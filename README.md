@@ -1,7 +1,7 @@
 # qa
 Read the QA Project outputs and graph
 
-** CNI Image Quality analysis
+## CNI Image Quality analysis
 
 Methods based to read data from the CNI QA project and plot values over time.
 
