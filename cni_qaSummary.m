@@ -49,7 +49,7 @@ stPrint(qaAcq,'label');
 qaAnalyses = qaSessions{12}.analyses();
 stPrint(qaAnalyses,'label');
 
-%%
+%% Find all the analyses with a 'cni-tsnr' in the label
 qaFiles    = qaSessions{12}.files;
 qaAnalyses = qaSessions{12}.analyses();
 qaAnalyses = stSelect(qaAnalyses,'label','cni-tsnr');
@@ -70,11 +70,6 @@ thisAcq.label
 thisAcq.created
 
 qaData.acquisition = thisAcq;
-
-
-%% Find all the analyses with a 'cni-tsnr' in the label
-
-
 
 %% This would be all sessions in the project.
 
