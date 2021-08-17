@@ -69,7 +69,8 @@ for ii=1:numel(acq1)
     s(ii) = str2double(acq1{ii}.sfnr_center);
     d(ii) = acq1{ii}.created;
 end
-plot(d,s)
+plot(d,s);
+grid on
 title(acqNames{1});
 
 %%
@@ -82,7 +83,7 @@ for ii=1:numel(acq2)
 end
 plot(d,s)
 title(acqNames{2});
-
+grid on
 
 %% This would be all sessions in the project.
 
