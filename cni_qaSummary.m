@@ -2,6 +2,91 @@
 
 %% Open a channel to the cni Flywheel instaqnce
 cni = scitran('cni');
+qaProject = cni.lookup('cni/qa');
+
+% Find the sessions created after a certain date.
+qaSessions = qaProject.sessions.find('created>2021-03-15');
+fprintf('Found %d sessions\n',numel(qaSessions));
+
+%% Find all the analyses with a 'cni-tsnr' in the label
+qq = 1;
+clear qaData
+for ss=1:numel(qaSessions)
+    
+    % Get the analyses
+    qaAnalyses = qaSessions{ss}.analyses();
+    if ~isempty(qaAnalyses)
+        
+        qaAnalyses = stSelect(qaAnalyses,'label','cni-tsnr');
+        if ~isempty(qaAnalyses)
+            for aa = 1:numel(qaAnalyses)
+                % Find the result file
+                thisFile = stSelect(qaAnalyses{aa}.files,'name','result');
+                if isempty(thisFile)
+                    fprintf('No result.json file found\n');
+                    stPrint(qaAnalyses{aa}.files,'name');
+                else
+                    fprintf('Analyses with a result file found in session %d\n',ss);
+                    
+                    % Download the file and read its contents
+                    thisFile{1}.download('result.json');
+                    tmp = jsonread('result.json');
+                    tmp.created = qaAnalyses{aa}.created;
+                    
+                    %% Find which acquisition has the input file from the analyses
+                    
+                    % The acquisition label should be the same when we plot the snr or sfnr.
+                    fileid = qaAnalyses{aa}.inputs{1}.id;
+                    thisAcq = cni.search('acquisition','fileid',fileid,'container',true);
+                    if ~isempty(thisAcq)
+                        tmp.acquisition =  thisAcq{1}.label;
+                    else
+                        fprintf('No acquisition found for input file on analysis %d\n',aa);
+                        tmp.acquisition = 'Unknown acq';
+                    end
+                    qaData{qq} = tmp; %#ok<SAGROW>
+                    qq = qq+1;
+                end
+            end
+        end
+    end
+end
+
+%% Now we could pull out the variables we want
+%
+% Say we want the snr for all the acquisitions with a label
+% or the sfnr.
+acqNames = {'BOLD EPI Ax','Ax EPI'};
+stPrint(qaData,'acquisition');
+
+acq1 = stSelect(qaData,'acquisition',acqNames{1});
+acq2 = stSelect(qaData,'acquisition',acqNames{2});
+
+%%
+clear s t d
+mrvNewGraphWin;
+for ii=1:numel(acq1)
+    s(ii) = str2double(acq1{ii}.sfnr_center);
+    d(ii) = acq1{ii}.created;
+end
+plot(d,s)
+title(acqNames{1});
+
+%%
+clear s t d
+mrvNewGraphWin;
+for ii=1:numel(acq2)
+    s(ii) = str2double(acq2{ii}.sfnr_center);
+    % t(ii) = str2double(acq2{ii}.tsnr_center);
+    d(ii) = acq2{ii}.created;
+end
+plot(d,s)
+title(acqNames{2});
+
+
+%% This would be all sessions in the project.
+
+% qaSessions = qaProject.sessions();
 
 %% Get the QA project information
 %{
@@ -24,17 +109,6 @@ stPrint(qaFiles,'name')
 qaFiles{8}.download('thisresult.json');
 result = jsonread('thisresult.json');
 %}
-%% The logical flow
-
-qaProject = cni.lookup('cni/qa');
-
-% How to get a single, full project by search.
-%  tmp = cni.search('project','project label exact','qa','container',true);
-%  qaProject = tmp{1};
-
-% Find the sessions created after a certain date.
-qaSessions = qaProject.sessions.find('created>2021-07-15');
-
 %% Could we search for qa project sessions with a recent date?
 
 % I guess so!  We must 'fw' true it takes a lot longer but we get back
@@ -56,63 +130,5 @@ size(qaSessions)
 
 % qaAnalyses = qaSessions{ss}.analyses();
 % stPrint(qaAnalyses,'label');
-
-%% Find all the analyses with a 'cni-tsnr' in the label
-qq = 1;
-clear qaData
-for ss=1:numel(qaSessions)
-    
-    qaAnalyses = qaSessions{ss}.analyses();
-    if isempty(qaAnalyses), break; end
-    qaAnalyses = stSelect(qaAnalyses,'label','cni-tsnr');
-    if ~isempty(qaAnalyses)
-        for aa = 1:numel(qaAnalyses)
-            % Find the result file
-            thisFile = stSelect(qaAnalyses{aa}.files,'name','result');
-            if isempty(thisFile)
-                fprintf('No result.json file found\n');
-                stPrint(qaAnalyses{aa}.files,'name');
-            else
-                fprintf('Analyses with a result file found in session %d\n',ss);
-
-                % Download the file and read its contents
-                thisFile{1}.download('result.json');
-                tmp = jsonread('result.json');
-                tmp.created = qaAnalyses{aa}.created;
-                
-                %% Find which acquisition has the input file from the analyses
-                
-                % The acquisition label should be the same when we plot the snr or sfnr.
-                fileid = qaAnalyses{aa}.inputs{1}.id;
-                thisAcq = cni.search('acquisition','fileid',fileid,'container',true);
-                tmp.acquisition =  thisAcq{1}.label;
-                qaData{qq} = tmp; %#ok<SAGROW>
-                qq = qq+1;
-            end
-        end
-    end
-    
-end
-
-%% Now we could pull out the variables we want
-%
-% Say we want the snr for all the acquisitions with a label
-% or the sfnr.
-acqNames = {'BOLD EPI Ax','Ax EPI'};
-stPrint(qaData,'acquisition');
-
-acq1 = stSelect(qaData,'acquisition',acqNames{1});
-acq2 = stSelect(qaData,'acquisition',acqNames{2});
-
-str2double(acq1{1}.sfnr_center)
-str2double(acq1{1}.tsnr_center)
-
-str2double(acq2{1}.sfnr_center)
-str2double(acq2{1}.tsnr_center)
-
-%% This would be all sessions in the project.
-
-% qaSessions = qaProject.sessions();
-
 
 %% END
