@@ -26,9 +26,11 @@ result = jsonread('thisresult.json');
 %}
 %% The logical flow
 
+qaProject = cni.lookup('cni/qa');
+
 % How to get a single, full project by search.
-tmp = cni.search('project','project label exact','qa','container',true);
-qaProject = tmp{1};
+%  tmp = cni.search('project','project label exact','qa','container',true);
+%  qaProject = tmp{1};
 
 % Find the sessions created after a certain date.
 qaSessions = qaProject.sessions.find('created>2021-06-15');
@@ -56,7 +58,6 @@ qaAnalyses = qaSessions{ss}.analyses();
 stPrint(qaAnalyses,'label');
 
 %% Find all the analyses with a 'cni-tsnr' in the label
-qaFiles    = qaSessions{ss}.files;
 qaAnalyses = qaSessions{ss}.analyses();
 qaAnalyses = stSelect(qaAnalyses,'label','cni-tsnr');
 
@@ -71,8 +72,9 @@ qaData.created = qaAnalyses{1}.created;
 %% Find which acquisition has the input file from the analyses
 
 % The acquisition label should be the same when we plot the snr or sfnr.
-thisA = qaAnalyses{1};
-fileid = thisA.inputs{1}.id;
+thisAn = qaAnalyses{1};
+% inputFile = cni.fw.get(thisAn.inputs{1}.id);
+fileid = thisAn.inputs{1}.id;
 tmp = cni.search('acquisition','fileid',fileid,'container',true);
 thisAcq = tmp{1};
 thisAcq.label
