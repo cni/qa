@@ -69,7 +69,7 @@ for ii=1:numel(acq1)
     s(ii) = str2double(acq1{ii}.sfnr_center);
     d(ii) = acq1{ii}.created;
 end
-plot(d,s);
+plot(d,s,'LineWidth',2)
 grid on
 title(acqNames{1});
 
@@ -81,7 +81,7 @@ for ii=1:numel(acq2)
     % t(ii) = str2double(acq2{ii}.tsnr_center);
     d(ii) = acq2{ii}.created;
 end
-plot(d,s)
+plot(d,s,'LineWidth',2)
 title(acqNames{2});
 grid on
 
