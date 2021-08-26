@@ -1,6 +1,7 @@
 %% Draft
 
-%% Open a channel to the cni Flywheel instaqnce
+%% Open a channel to the cni Flywheel instance
+
 cni = scitran('cni');
 qaProject = cni.lookup('cni/qa');
 
