@@ -21,6 +21,7 @@ for ss=1:numel(qaSessions)
         qaAnalyses = stSelect(qaAnalyses,'label','cni-tsnr');
         if ~isempty(qaAnalyses)
             for aa = 1:numel(qaAnalyses)
+                
                 % Find the result file
                 thisFile = stSelect(qaAnalyses{aa}.files,'name','result');
                 if isempty(thisFile)
@@ -34,10 +35,33 @@ for ss=1:numel(qaSessions)
                     tmp = jsonread('result.json');
                     tmp.created = qaAnalyses{aa}.created;
                     
-                    %% Find which acquisition has the input file from the analyses
+                    % Find which acquisition has the input file from
+                    % the analyses. The acquisition label should be
+                    % the same when we plot the snr or sfnr. 
+
+                    % This is the id of a file.  We want to find which
+                    % acquisition contains this file.
                     
-                    % The acquisition label should be the same when we plot the snr or sfnr.
-                    fileid = qaAnalyses{aa}.inputs{1}.id;
+                    % This is the analysis
+                    % qaAnalyses{aa}.inputs{1}.parentRef 
+
+                    % The acquisition is empty in this case.
+                    % qaAnalyses{aa}.inputs{1}.parents
+
+                    % This is the fileId.  How can we find it and the
+                    % acquisition that contains it?  Use lookup?
+                    %
+                    % To find the acquisition, we can get session for
+                    % the analysis this way where the ID is the
+                    % session id
+                    %
+                    % theSession = cni.fw.sessions.findOne('_id=604f89af9cf87cf7bb3da252')
+                    % Loop through the acqusitions to find the file
+                    %
+                    % acquisitions = cni.fw.acquisitions.find('session=sessionID')
+                    % Ver 17 will have cni.fw.files.find and
+                    %                  cni.fw.analyes.find
+                    fileid = qaAnalyses{aa}.inputs{1}.fileId;
                     thisAcq = cni.search('acquisition','fileid',fileid,'container',true);
                     if ~isempty(thisAcq)
                         tmp.acquisition =  thisAcq{1}.label;
